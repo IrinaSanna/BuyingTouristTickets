@@ -16,6 +16,10 @@ jobs:
           distribution: 'adopt'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+      - name: Container start
+        run: docker-compose up &
+      - name: Waiting for сontainer start
+        run: sleep 30
       - name: Start SUT
         run: java -jar aqa-shop.jar -P:jdbc.url=jdbc:mysql://localhost:3306/app &
       - name: Build with Gradle
