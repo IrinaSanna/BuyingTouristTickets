@@ -30,5 +30,5 @@ public class SQLHelper {
         var codeSQL = "SELECT status FROM payment_entity";
         var conn = getConn();
         return QUERY_RUNNER.query(conn, codeSQL, new ScalarHandler<>());
-        }
+    }
 }

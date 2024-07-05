@@ -1,10 +1,10 @@
 package ru.netology.test;
 
+import com.codeborne.selenide.Selenide;
+import com.codeborne.selenide.logevents.SelenideLogger;
+import io.qameta.allure.selenide.AllureSelenide;
 import lombok.val;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import ru.netology.data.DataGenerator;
 import ru.netology.data.SQLHelper;
 import ru.netology.page.PaymentPage;
@@ -18,9 +18,18 @@ import static ru.netology.data.SQLHelper.cleanDatabase;
 
 public class PaymentByCardTest {
 
-    @AfterAll
+    @BeforeAll
     static void tearDownAll() {
         cleanDatabase();
+    }
+
+    static void setUpAll() {
+        SelenideLogger.addListener("allure", new AllureSelenide());
+    }
+
+    @AfterAll
+    static void tearDownAllReport() {
+        SelenideLogger.removeListener("allure");
     }
 
     @BeforeEach
@@ -29,152 +38,166 @@ public class PaymentByCardTest {
     }
 
     @Test
+    @DisplayName("Successful transaction")
     void shouldBeSuccessfulTransaction() {
-        val startPage = new StartPage();
-        val paymentPage = startPage.payByDebitCard();
-        val cardInfo = DataGenerator.generateInfoCard();
+        var startPage = new StartPage();
+        var paymentPage = startPage.payByDebitCard();
+        var cardInfo = DataGenerator.generateInfoCard();
         paymentPage.fillForm(cardInfo);
-        paymentPage.findMessageSuccessful("Успешно Операция одобрена Банком.");
+        paymentPage.findMessageTransaction("Успешно Операция одобрена Банком.");
     }
 
     @Test
-    void shouldNotPaymentWithoutCardNumber() { // пустое поле "Номер карты"
-        val startPage = new StartPage();
-        val paymentPage = startPage.payByDebitCard();
-        val cardInfo = new DataGenerator.CardInfo(getEmptyCardNumberField(), generateMonth(), generateYear(),
+    @DisplayName("Empty card number field")
+    void shouldNotPaymentWithoutCardNumber() {
+        var startPage = new StartPage();
+        var paymentPage = startPage.payByDebitCard();
+        var cardInfo = new DataGenerator.CardInfo(getEmptyCardNumberField(), generateMonth(), generateYear(),
                 generateOwner(), String.valueOf(generateCVC()));
         paymentPage.fillForm(cardInfo);
         paymentPage.errorForCardEmptyField();
     }
 
     @Test
-    void shouldNotPaymentWithIncompleteCardNumber() { // неполный номер карты
-        val startPage = new StartPage();
-        val paymentPage = startPage.payByDebitCard();
-        val cardInfo = new DataGenerator.CardInfo(getIncompleteCardNumber(), generateMonth(), generateYear(),
+    @DisplayName("Incomplete card number")
+    void shouldNotPaymentWithIncompleteCardNumber() {
+        var startPage = new StartPage();
+        var paymentPage = startPage.payByDebitCard();
+        var cardInfo = new DataGenerator.CardInfo(getIncompleteCardNumber(), generateMonth(), generateYear(),
                 generateOwner(), String.valueOf(generateCVC()));
         paymentPage.fillForm(cardInfo);
         paymentPage.errorForCardEmptyField();
     }
 
     @Test
-    void shouldNotPaymentWithoutMonth() { // пустое поле "Месяц"
-        val startPage = new StartPage();
-        val paymentPage = startPage.payByDebitCard();
-        val cardInfo = new DataGenerator.CardInfo(getCardNumber(), getEmptyMonthField(), generateYear(), generateOwner(),
+    @DisplayName("Empty month field")
+    void shouldNotPaymentWithoutMonth() {
+        var startPage = new StartPage();
+        var paymentPage = startPage.payByDebitCard();
+        var cardInfo = new DataGenerator.CardInfo(getCardNumber(), getEmptyMonthField(), generateYear(), generateOwner(),
                 String.valueOf(generateCVC()));
         paymentPage.fillForm(cardInfo);
         paymentPage.errorForEmptyMonthField();
     }
 
     @Test
-    void shouldNotMonthZeros() { // заполнение поля "Месяц" нулями
-        val startPage = new StartPage();
-        val paymentPage = startPage.payByDebitCard();
-        val cardInfo = new DataGenerator.CardInfo(getCardNumber(), getMonthWithZeros(), generateYear(), generateOwner(),
+    @DisplayName("Filling the month field with zeros")
+    void shouldNotMonthZeros() {
+        var startPage = new StartPage();
+        var paymentPage = startPage.payByDebitCard();
+        var cardInfo = new DataGenerator.CardInfo(getCardNumber(), getMonthWithZeros(), generateYear(), generateOwner(),
                 String.valueOf(generateCVC()));
         paymentPage.fillForm(cardInfo);
         paymentPage.invalidMonthFieldError();
     }
 
     @Test
-    void monthShouldNotBeInvalid() { // заполнение поля "Месяц" цифрой 13
-        val startPage = new StartPage();
-        val paymentPage = startPage.payByDebitCard();
-        val cardInfo = new DataGenerator.CardInfo(getCardNumber(), getInvalidMonth(), generateYear(), generateOwner(),
+    @DisplayName("Filling the month field with the number 13")
+    void monthShouldNotBeInvalid() {
+        var startPage = new StartPage();
+        var paymentPage = startPage.payByDebitCard();
+        var cardInfo = new DataGenerator.CardInfo(getCardNumber(), getInvalidMonth(), generateYear(), generateOwner(),
                 String.valueOf(generateCVC()));
         paymentPage.fillForm(cardInfo);
         paymentPage.invalidMonthFieldError();
     }
 
     @Test
-    void shouldNotPaymentWithoutYear() { // пустое поле "Год"
-        val startPage = new StartPage();
-        val paymentPage = startPage.payByDebitCard();
-        val cardInfo = new DataGenerator.CardInfo(getCardNumber(), generateMonth(), getEmptyYearField(), generateOwner(),
+    @DisplayName("Empty year field")
+    void shouldNotPaymentWithoutYear() {
+        var startPage = new StartPage();
+        var paymentPage = startPage.payByDebitCard();
+        var cardInfo = new DataGenerator.CardInfo(getCardNumber(), generateMonth(), getEmptyYearField(), generateOwner(),
                 String.valueOf(generateCVC()));
         paymentPage.fillForm(cardInfo);
         paymentPage.errorForEmptyYearField();
     }
 
     @Test
-    void yearShouldNotBeInvalid() { // заполнение поля "Год" прошедшим годом
-        val startPage = new StartPage();
-        val paymentPage = startPage.payByDebitCard();
-        val cardInfo = new DataGenerator.CardInfo(getCardNumber(), generateMonth(), getInvalidYear(), generateOwner(),
+    @DisplayName("Filling the year field with the previous year")
+    void yearShouldNotBeInvalid() {
+        var startPage = new StartPage();
+        var paymentPage = startPage.payByDebitCard();
+        var cardInfo = new DataGenerator.CardInfo(getCardNumber(), generateMonth(), getInvalidYear(), generateOwner(),
                 String.valueOf(generateCVC()));
         paymentPage.fillForm(cardInfo);
         paymentPage.errorInvalidYear();
     }
 
     @Test
-    void shouldNotPaymentWithoutOwner() { // пустое поле "Владелец"
-        val startPage = new StartPage();
-        val paymentPage = startPage.payByDebitCard();
-        val cardInfo = new DataGenerator.CardInfo(getCardNumber(), generateMonth(), generateYear(), getEmptyOwnerField(),
+    @DisplayName("Empty owner field")
+    void shouldNotPaymentWithoutOwner() {
+        var startPage = new StartPage();
+        var paymentPage = startPage.payByDebitCard();
+        var cardInfo = new DataGenerator.CardInfo(getCardNumber(), generateMonth(), generateYear(), getEmptyOwnerField(),
                 String.valueOf(generateCVC()));
         paymentPage.fillForm(cardInfo);
         paymentPage.errorForEmptyOwnerField();
     }
 
     @Test
-    void ownerShouldNotBeInCyrillic() { // заполнение поля "Владелец" на кириллице
-        val startPage = new StartPage();
-        val paymentPage = startPage.payByDebitCard();
-        val cardInfo = new DataGenerator.CardInfo(getCardNumber(), generateMonth(), generateYear(), getOwnerInCyrillic(),
+    @DisplayName("Filling out the owner field in Cyrillic")
+    void ownerShouldNotBeInCyrillic() {
+        var startPage = new StartPage();
+        var paymentPage = startPage.payByDebitCard();
+        var cardInfo = new DataGenerator.CardInfo(getCardNumber(), generateMonth(), generateYear(), getOwnerInCyrillic(),
                 String.valueOf(generateCVC()));
         paymentPage.fillForm(cardInfo);
         paymentPage.errorOwnerInCyrillic();
     }
 
     @Test
-    void ownerShouldNotBeInvalid() { // заполнение поля "Владелец" цифрами
-        val startPage = new StartPage();
-        val paymentPage = startPage.payByDebitCard();
-        val cardInfo = new DataGenerator.CardInfo(getCardNumber(), generateMonth(), generateYear(), getOwnerNumbers(),
+    @DisplayName("Filling the owner field with numbers")
+    void ownerShouldNotBeInvalid() {
+        var startPage = new StartPage();
+        var paymentPage = startPage.payByDebitCard();
+        var cardInfo = new DataGenerator.CardInfo(getCardNumber(), generateMonth(), generateYear(), getOwnerNumbers(),
                 String.valueOf(generateCVC()));
         paymentPage.fillForm(cardInfo);
         paymentPage.errorOwnerNumbers();
     }
 
     @Test
-    void shouldNotPaymentWithoutCVC() { // пустое поле "CVC/CVV"
-        val startPage = new StartPage();
-        val paymentPage = startPage.payByDebitCard();
-        val cardInfo = new DataGenerator.CardInfo(getCardNumber(), generateMonth(), generateYear(), generateOwner(), getEmptyCVCField());
+    @DisplayName("Empty CVC/CVV field")
+    void shouldNotPaymentWithoutCVC() {
+        var startPage = new StartPage();
+        var paymentPage = startPage.payByDebitCard();
+        var cardInfo = new DataGenerator.CardInfo(getCardNumber(), generateMonth(), generateYear(), generateOwner(), getEmptyCVCField());
         paymentPage.fillForm(cardInfo);
         paymentPage.errorForEmptyCVCField();
     }
 
     @Test
-    void CVCShouldNotBeInvalid() { // заполнение поля "CVC/CVV" из двух цифр
-        val startPage = new StartPage();
-        val paymentPage = startPage.payByDebitCard();
-        val cardInfo = new DataGenerator.CardInfo(getCardNumber(), generateMonth(), generateYear(), generateOwner(),
+    @DisplayName("Filling the CVC/CVV field with two digits")
+    void CVCShouldNotBeInvalid() {
+        var startPage = new StartPage();
+        var paymentPage = startPage.payByDebitCard();
+        var cardInfo = new DataGenerator.CardInfo(getCardNumber(), generateMonth(), generateYear(), generateOwner(),
                 String.valueOf(getInvalidCVC()));
         paymentPage.fillForm(cardInfo);
         paymentPage.errorInvalidCVCCVV();
     }
 
     @Test
+    @DisplayName("When a transaction is declined, show an error notification")
     void shouldBeTransactionError() {
-        val startPage = new StartPage();
-        val paymentPage = startPage.payByDebitCard();
-        val cardInfo = new DataGenerator.CardInfo(getInvalidCardNumber(), generateMonth(), generateYear(), generateOwner(),
+        var startPage = new StartPage();
+        var paymentPage = startPage.payByDebitCard();
+        var cardInfo = new DataGenerator.CardInfo(getInvalidCardNumber(), generateMonth(), generateYear(), generateOwner(),
                 String.valueOf(generateCVC()));
         paymentPage.fillForm(cardInfo);
-        paymentPage.findErrorTransaction("Ошибка Ошибка! Банк отказал в проведении операции.");
+        paymentPage.findMessageTransaction("Ошибка Ошибка! Банк отказал в проведении операции.");
     }
 
     @Test
-    @DisplayName("Should be transaction successful")
+    @DisplayName("Checking the database record of a successful transaction")
     void shouldSuccessfulTransactionInDatabase() {
-        val startPage = new StartPage();
-        val paymentPage = startPage.payByDebitCard();
-        val cardInfo = new DataGenerator.CardInfo(getCardNumber(), generateMonth(), generateYear(), generateOwner(),
+        var startPage = new StartPage();
+        var paymentPage = startPage.payByDebitCard();
+        var cardInfo = new DataGenerator.CardInfo(getCardNumber(), generateMonth(), generateYear(), generateOwner(),
                 String.valueOf(generateCVC()));
         paymentPage.fillForm(cardInfo);
-        paymentPage.findMessageSuccessful("Успешно Операция одобрена Банком.");
+        paymentPage.findMessageTransaction("Успешно Операция одобрена Банком.");
         assertEquals("APPROVED", SQLHelper.getPaymentStatus());
     }
 }
