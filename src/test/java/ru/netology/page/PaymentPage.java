@@ -21,7 +21,7 @@ public class PaymentPage {
     private final SelenideElement ownerCard = $(byText("Владелец")).parent().$(".input__control");
     private final SelenideElement numberCVC = $(byText("CVC/CVV")).parent().$(".input__control");
     private final SelenideElement buttonContinue = $(byText("Продолжить"));
-    //private final SelenideElement messageSuccessful = $(".notification_status_ok");
+    private final SelenideElement messageSuccessful = $(".notification_status_ok");
     private final SelenideElement errorInCardNumber = $(byText("Неверный формат")).parent().$(".input__sub");
     private final SelenideElement errorMonth = $(byText("Неверный формат")).parent().$(".input__sub");
     private final SelenideElement errorInvalidMonth = $(byText("Неверно указан срок действия карты")).parent().$(".input__sub");
@@ -32,8 +32,7 @@ public class PaymentPage {
     private final SelenideElement errorOwnerNumbers = $(byText("Введите фамилию и имя латинскими буквами как на карте")).parent().$(".input__sub");
     private final SelenideElement errorCVC = $(byText("Поле обязательно для заполнения")).parent().$(".input__sub");
     private final SelenideElement errorInvalidCVC = $(byText("Неверный формат")).parent().$(".input__sub");
-   // private final SelenideElement transactionErrorMessage = $(".notification_status_error");
-    private final SelenideElement messageTransaction = $(".notification_visible");
+    private final SelenideElement transactionErrorMessage = $(".notification_status_error");
 
     public void fillForm(DataGenerator.CardInfo cardInfo) {
         numberCard.setValue(cardInfo.getCardNumber());
@@ -44,12 +43,8 @@ public class PaymentPage {
         buttonContinue.click();
     }
 
-   // public void findMessageSuccessful(String expectedText) {
-   //     messageSuccessful.shouldBe(text(expectedText), Duration.ofSeconds(15));
-   // }
-
-    public void findMessageTransaction(String expectedText) {
-        messageTransaction.shouldBe(text(expectedText), Duration.ofSeconds(15));
+    public void findMessageSuccessful(String expectedText) {
+        messageSuccessful.shouldBe(text(expectedText), Duration.ofSeconds(15));
     }
 
     public void errorForCardEmptyField() {
@@ -92,7 +87,7 @@ public class PaymentPage {
         errorInvalidCVC.shouldBe(visible);
     }
 
-   // public void findErrorTransaction(String expectedText) {
-   //     transactionErrorMessage.shouldBe(text(expectedText), Duration.ofSeconds(15));
-   // }
+    public void findErrorTransaction(String expectedText) {
+        transactionErrorMessage.shouldBe(text(expectedText), Duration.ofSeconds(15));
+    }
 }

@@ -44,7 +44,7 @@ public class PaymentByCardTest {
         var paymentPage = startPage.payByDebitCard();
         var cardInfo = DataGenerator.generateInfoCard();
         paymentPage.fillForm(cardInfo);
-        paymentPage.findMessageTransaction("Успешно Операция одобрена Банком.");
+        paymentPage.findMessageSuccessful("Успешно Операция одобрена Банком.");
     }
 
     @Test
@@ -186,7 +186,7 @@ public class PaymentByCardTest {
         var cardInfo = new DataGenerator.CardInfo(getInvalidCardNumber(), generateMonth(), generateYear(), generateOwner(),
                 String.valueOf(generateCVC()));
         paymentPage.fillForm(cardInfo);
-        paymentPage.findMessageTransaction("Ошибка Ошибка! Банк отказал в проведении операции.");
+        paymentPage.findErrorTransaction("Ошибка Ошибка! Банк отказал в проведении операции.");
     }
 
     @Test
@@ -197,7 +197,7 @@ public class PaymentByCardTest {
         var cardInfo = new DataGenerator.CardInfo(getCardNumber(), generateMonth(), generateYear(), generateOwner(),
                 String.valueOf(generateCVC()));
         paymentPage.fillForm(cardInfo);
-        paymentPage.findMessageTransaction("Успешно Операция одобрена Банком.");
+        paymentPage.findMessageSuccessful("Успешно Операция одобрена Банком.");
         assertEquals("APPROVED", SQLHelper.getPaymentStatus());
     }
 }
